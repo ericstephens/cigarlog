@@ -1,0 +1,6 @@
+# cigarlog src/db dependencies
+alembic>=1.13
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+pytest>=8.0
+pytest-postgresql>=6.0
