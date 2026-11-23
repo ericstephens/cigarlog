@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: cigarlog_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: cigarlog_pass_local
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cigarlog_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  oidc:
+    image: ghcr.io/navikt/mock-oauth2-server:latest
+    ports:
+      - "8080:8080"
+    environment:
+      JSON_CONFIG: |
+        {
+          "interactiveLogin": true,
+          "issuers": [
+            {
+              "issuerName": "local",
+              "tokenCallbacks": []
+            }
+          ]
+        }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/local/.well-known/openid-configuration || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build:
+      context: src/api
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      oidc:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:cigarlog_pass_local@postgres:5432/cigarlog_db
+      OIDC_ISSUER: http://oidc:8080/local
+      JWT_AUDIENCE: cigarlog-api
+
+  ui:
+    build:
+      context: src/ui
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
