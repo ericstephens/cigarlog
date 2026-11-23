@@ -221,3 +221,33 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Node / Frontend ---
+node_modules/
+dist/
+.vite/
+.vite-inspect/
+*.tsbuildinfo
+.eslintcache
+
+# --- Terraform / OpenTofu ---
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform.lock.hcl
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# --- General ---
+.DS_Store
+**/.DS_Store
+*.log
+*.swp
+*.swo
+*~
