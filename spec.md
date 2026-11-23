@@ -658,6 +658,7 @@ The v1 above is large for one person building part-time, with or without an agen
 - The user base is adult and mostly US, so inches and ring gauge are the primary units.
 - Cognito for production sign-in, with the API accepting any standards-compliant OIDC provider.
 - React with TanStack Router and Query, FastAPI, SQLAlchemy and Alembic, UUIDv7 keys.
+- Container runtime is **podman** (`podman` command); infrastructure-as-code is **OpenTofu** (`tofu` command). No Docker, no Terraform — pure open source throughout.
 - Year-1 scale of 1,000 users, 25,000 products and 500,000 log rows.
 
 **Answered questions**
