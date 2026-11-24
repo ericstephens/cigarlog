@@ -29,6 +29,7 @@ services:
           "issuers": [
             {
               "issuerName": "local",
+              "allowedAudiences": ["cigarlog"],
               "tokenCallbacks": []
             }
           ]
