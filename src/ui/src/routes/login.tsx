@@ -1,11 +1,14 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { userManager } from '../auth/AuthProvider'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { FormField } from '../components/ui/FormField'
 
 export default function LoginPage() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -14,9 +17,10 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
     try {
-      await userManager.signinRedirect({ login_hint: email })
+      await userManager.signinResourceOwnerCredentials({ username: email, password })
+      await navigate({ to: '/' })
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err))
+      setError('Invalid email or password.')
       setLoading(false)
     }
   }
@@ -45,14 +49,16 @@ export default function LoginPage() {
             <Input
               type="password"
               placeholder="••••••••"
-              defaultValue="dev"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </FormField>
 
           {error && <p className="text-xs text-red-400">{error}</p>}
 
           <Button type="submit" disabled={loading} className="mt-2 w-full py-2.5">
-            {loading ? 'Redirecting…' : 'Sign in'}
+            {loading ? 'Signing in…' : 'Sign in'}
           </Button>
         </form>
 

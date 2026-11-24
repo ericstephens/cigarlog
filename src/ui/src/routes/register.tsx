@@ -1,12 +1,17 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { userManager } from '../auth/AuthProvider'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { FormField } from '../components/ui/FormField'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
+
 export default function RegisterPage() {
-  const [email, setEmail] = useState('')
+  const navigate = useNavigate()
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -15,15 +20,31 @@ export default function RegisterPage() {
     setError(null)
     setLoading(true)
     try {
-      // Pass email and display name as hints to the OIDC provider.
-      // The mock server uses login_hint to pre-fill the subject field.
-      // The app creates the app_user row automatically on first login.
-      await userManager.signinRedirect({
-        login_hint: email,
-        extraQueryParams: { name },
+      // Sign in directly — mock OIDC and Keycloak (with direct grants enabled)
+      // accept credentials without a browser redirect.
+      const user = await userManager.signinResourceOwnerCredentials({
+        username: email,
+        password,
       })
+
+      // Update display name now that we have a token.
+      // The first API call also upserts the app_user row.
+      if (name.trim()) {
+        await fetch(`${API_BASE}/v1/me`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${user.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ display_name: name.trim() }),
+        })
+      }
+
+      await navigate({ to: '/' })
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err))
+      setError(
+        err instanceof Error ? err.message : 'Registration failed. Please try again.',
+      )
       setLoading(false)
     }
   }
@@ -59,13 +80,19 @@ export default function RegisterPage() {
           </FormField>
 
           <FormField label="Password">
-            <Input type="password" placeholder="Choose a password" defaultValue="" />
+            <Input
+              type="password"
+              placeholder="Choose a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </FormField>
 
           {error && <p className="text-xs text-red-400">{error}</p>}
 
           <Button type="submit" disabled={loading} className="mt-2 w-full py-2.5">
-            {loading ? 'Redirecting…' : 'Create account'}
+            {loading ? 'Creating account…' : 'Create account'}
           </Button>
         </form>
 
