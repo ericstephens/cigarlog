@@ -10,6 +10,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { FormField } from '../components/ui/FormField'
 import { TimezoneSelect } from '../components/TimezoneSelect'
+import { AppLayout } from '../components/AppLayout'
 
 const schema = z.object({
   display_name: z.string().min(1, 'Required').max(100),
@@ -99,10 +100,10 @@ function SettingsForm() {
 export default function SettingsPage() {
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-zinc-950 p-6 text-white">
+      <AppLayout>
         <h1 className="mb-6 text-xl font-bold">Profile Settings</h1>
         <SettingsForm />
-      </div>
+      </AppLayout>
     </RequireAuth>
   )
 }
