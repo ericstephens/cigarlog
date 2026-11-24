@@ -14,7 +14,7 @@ If KEYCLOAK_ADMIN_URL is empty the endpoint is a no-op (mock OIDC mode).
 
 import httpx
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, field_validator
 
 from app.config import settings
 
@@ -22,9 +22,14 @@ router = APIRouter(prefix="/v1/auth", tags=["auth"])
 
 
 class RegisterRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     display_name: str = ""
+
+    @field_validator("email")
+    @classmethod
+    def normalise_email(cls, v: str) -> str:
+        return v.strip().lower()
 
 
 async def _get_admin_token(client: httpx.AsyncClient) -> str:
