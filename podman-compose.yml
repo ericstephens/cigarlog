@@ -25,7 +25,7 @@ services:
     environment:
       JSON_CONFIG: |
         {
-          "interactiveLogin": true,
+          "interactiveLogin": false,
           "issuers": [
             {
               "issuerName": "local",
