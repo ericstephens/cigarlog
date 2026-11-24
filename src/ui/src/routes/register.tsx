@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
 import { userManager } from '../auth/AuthProvider'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -8,7 +7,6 @@ import { FormField } from '../components/ui/FormField'
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
 export default function RegisterPage() {
-  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -33,7 +31,7 @@ export default function RegisterPage() {
 
       // User exists in Keycloak — sign in directly (no redirect).
       await userManager.signinResourceOwnerCredentials({ username: email, password })
-      await navigate({ to: '/' })
+      window.location.replace('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed.')
       setLoading(false)

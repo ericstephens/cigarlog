@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
 import { userManager } from '../auth/AuthProvider'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { FormField } from '../components/ui/FormField'
 
 export default function LoginPage() {
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -18,9 +16,9 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await userManager.signinResourceOwnerCredentials({ username: email, password })
-      await navigate({ to: '/' })
+      window.location.replace('/')
     } catch (err) {
-      setError('Invalid email or password.')
+      setError(err instanceof Error ? err.message : String(err))
       setLoading(false)
     }
   }
