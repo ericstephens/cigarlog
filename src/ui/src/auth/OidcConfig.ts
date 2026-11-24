@@ -7,4 +7,8 @@ export const oidcConfig: UserManagerSettings = {
   response_type: 'code',
   scope: 'openid email profile',
   post_logout_redirect_uri: window.location.origin,
+  // Disable all automatic background behavior
+  automaticSilentRenew: false,
+  monitorSession: false,
+  checkSessionIntervalInSeconds: 0,
 }

@@ -19,8 +19,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // getUser() reads from sessionStorage — no network call, no redirect
     userManager.getUser().then((u) => {
-      setUser(u)
+      // Treat expired users as logged out
+      setUser(u && !u.expired ? u : null)
+      setIsLoading(false)
+    }).catch(() => {
+      setUser(null)
       setIsLoading(false)
     })
     const cb = (u: User) => setUser(u)
