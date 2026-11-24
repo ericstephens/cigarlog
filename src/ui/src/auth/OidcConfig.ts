@@ -1,7 +1,7 @@
 import type { UserManagerSettings } from 'oidc-client-ts'
 
 export const oidcConfig: UserManagerSettings = {
-  authority: import.meta.env.VITE_OIDC_AUTHORITY ?? 'http://localhost:8080/local',
+  authority: import.meta.env.VITE_OIDC_AUTHORITY ?? 'http://localhost:8081/realms/cigarlog',
   client_id: import.meta.env.VITE_OIDC_CLIENT_ID ?? 'cigarlog',
   redirect_uri: `${window.location.origin}/callback`,
   response_type: 'code',

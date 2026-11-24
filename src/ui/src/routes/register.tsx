@@ -20,31 +20,22 @@ export default function RegisterPage() {
     setError(null)
     setLoading(true)
     try {
-      // Sign in directly — mock OIDC and Keycloak (with direct grants enabled)
-      // accept credentials without a browser redirect.
-      const user = await userManager.signinResourceOwnerCredentials({
-        username: email,
-        password,
+      // Create the user in Keycloak via the backend proxy.
+      const res = await fetch(`${API_BASE}/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, display_name: name.trim() }),
       })
-
-      // Update display name now that we have a token.
-      // The first API call also upserts the app_user row.
-      if (name.trim()) {
-        await fetch(`${API_BASE}/v1/me`, {
-          method: 'PATCH',
-          headers: {
-            Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ display_name: name.trim() }),
-        })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { detail?: string }
+        throw new Error(body.detail ?? 'Registration failed.')
       }
 
+      // User exists in Keycloak — sign in directly (no redirect).
+      await userManager.signinResourceOwnerCredentials({ username: email, password })
       await navigate({ to: '/' })
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Registration failed. Please try again.',
-      )
+      setError(err instanceof Error ? err.message : 'Registration failed.')
       setLoading(false)
     }
   }

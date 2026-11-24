@@ -80,14 +80,14 @@ case "$cmd" in
 
   # ── Local containers ────────────────────────────────────────────────────────
   up)
-    echo "Starting postgres and mock OIDC..."
-    $COMPOSE up -d postgres oidc
+    echo "Starting postgres and Keycloak..."
+    $COMPOSE up -d postgres keycloak
     echo ""
     echo "  Postgres  : localhost:5433  (db: cigarlog_db)"
-    echo "  Mock OIDC : http://localhost:8080/local"
+    echo "  Keycloak  : http://localhost:8081  (admin / admin)"
     echo ""
+    echo "Keycloak takes ~30s to be ready. Check: ./manage.sh logs keycloak"
     echo "Next: ./manage.sh migrate"
-    echo "Tip:  ./manage.sh oidc:keycloak  to run with Keycloak instead"
     ;;
 
   down)
@@ -114,9 +114,12 @@ case "$cmd" in
     echo ""
     echo "  Mock OIDC issuer : http://localhost:8080/local"
     echo ""
-    echo "Run the API with:"
-    echo "  OIDC_ISSUER=http://localhost:8080/local JWT_AUDIENCE=cigarlog ./manage.sh api"
-    echo "  (or just ./manage.sh api — these are the defaults)"
+    echo "Run the API + UI pointed at mock OIDC:"
+    echo "  OIDC_ISSUER=http://localhost:8080/local KEYCLOAK_ADMIN_URL= ./manage.sh api"
+    echo "  VITE_OIDC_AUTHORITY=http://localhost:8080/local ./manage.sh ui"
+    echo ""
+    echo "Note: registration creates users in Keycloak. With mock OIDC,"
+    echo "  set KEYCLOAK_ADMIN_URL= so the register endpoint is a no-op."
     ;;
 
   oidc:keycloak)
@@ -153,19 +156,20 @@ case "$cmd" in
 
   # ── Dev servers ─────────────────────────────────────────────────────────────
   api)
-    # Uses mock OIDC by default; override by setting OIDC_ISSUER + JWT_AUDIENCE
+    # Defaults to Keycloak; override OIDC_ISSUER + JWT_AUDIENCE for other providers
     cd "$API_DIR"
-    DATABASE_URL="postgresql+asyncpg://postgres:cigarlog_pass_local@127.0.0.1:5432/cigarlog_db" \
-    OIDC_ISSUER="${OIDC_ISSUER:-http://localhost:8080/local}" \
+    DATABASE_URL="postgresql+asyncpg://postgres:cigarlog_pass_local@127.0.0.1:5433/cigarlog_db" \
+    OIDC_ISSUER="${OIDC_ISSUER:-http://localhost:8081/realms/cigarlog}" \
     JWT_AUDIENCE="${JWT_AUDIENCE:-cigarlog}" \
+    KEYCLOAK_ADMIN_URL="${KEYCLOAK_ADMIN_URL:-http://localhost:8081}" \
     DEBUG="${DEBUG:-true}" \
     uvicorn app.main:app --reload --port 8000
     ;;
 
   ui)
-    # Uses mock OIDC by default; .env.local overrides for Cognito
+    # Defaults to Keycloak; .env.local overrides for Cognito
     cd "$UI_DIR"
-    VITE_OIDC_AUTHORITY="${VITE_OIDC_AUTHORITY:-http://localhost:8080/local}" \
+    VITE_OIDC_AUTHORITY="${VITE_OIDC_AUTHORITY:-http://localhost:8081/realms/cigarlog}" \
     VITE_OIDC_CLIENT_ID="${VITE_OIDC_CLIENT_ID:-cigarlog}" \
     VITE_API_BASE_URL="${VITE_API_BASE_URL:-http://localhost:8000}" \
     npm run dev
