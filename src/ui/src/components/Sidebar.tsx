@@ -8,6 +8,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { label: 'Lounges', href: '/lounges', icon: '🏛' },
   { label: 'Settings', href: '/settings', icon: '⚙' },
 ]
 
