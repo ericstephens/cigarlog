@@ -51,9 +51,9 @@ services:
       oidc:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:cigarlog_pass_local@postgres:5432/cigarlog_db
+      DATABASE_URL: postgresql+asyncpg://postgres:cigarlog_pass_local@postgres:5432/cigarlog_db
       OIDC_ISSUER: http://oidc:8080/local
-      JWT_AUDIENCE: cigarlog-api
+      JWT_AUDIENCE: cigarlog
 
   ui:
     build:
