@@ -6,7 +6,7 @@ import SettingsPage from './routes/settings'
 export default function App() {
   const path = window.location.pathname
   if (path === '/callback') return <CallbackPage />
-  if (path === '/login') return <LoginPage />
   if (path === '/register') return <RegisterPage />
-  return <SettingsPage />
+  if (path === '/settings') return <SettingsPage />
+  return <LoginPage />
 }
