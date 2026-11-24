@@ -7,7 +7,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import AppUser, Lounge
-from app.db.models.user import UserRole
 from app.deps import get_current_user, get_db
 from app.schemas.lounge import LoungeCreate, LoungeResponse, LoungeUpdate
 
@@ -15,7 +14,7 @@ router = APIRouter(prefix="/v1/lounges", tags=["lounges"])
 
 
 def _require_admin(user: AppUser) -> None:
-    if user.role != UserRole.admin:
+    if user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
 
 
