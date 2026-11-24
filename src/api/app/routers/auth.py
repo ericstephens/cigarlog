@@ -68,6 +68,7 @@ async def register(body: RegisterRequest) -> dict:
                 "firstName": body.display_name or body.email.split("@")[0],
                 "emailVerified": True,
                 "enabled": True,
+                "requiredActions": [],
             },
         )
 

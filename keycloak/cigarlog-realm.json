@@ -52,6 +52,7 @@
       "lastName": "User",
       "enabled": true,
       "emailVerified": true,
+      "requiredActions": [],
       "credentials": [
         {
           "type": "password",
@@ -70,5 +71,7 @@
     ]
   },
   "defaultRoles": ["user"],
-  "smtpServer": {}
+  "smtpServer": {},
+  "requiredCredentials": ["password"],
+  "defaultRequiredActions": []
 }
