@@ -48,7 +48,7 @@ async def patch_me(
         params["timezone"] = update.timezone
 
     await db.execute(
-        text(f"UPDATE app_user SET {', '.join(sets)} WHERE id = :id::uuid"),
+        text(f"UPDATE app_user SET {', '.join(sets)} WHERE id = CAST(:id AS uuid)"),
         params,
     )
     await db.commit()

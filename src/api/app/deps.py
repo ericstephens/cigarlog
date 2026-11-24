@@ -87,6 +87,12 @@ async def get_current_user(
     if user is None:
         raise HTTPException(status_code=500, detail="Failed to upsert user")
 
+    # Detach the user from the session before RLS setup.
+    # If set_transaction_identity fails and we rollback, a session-attached
+    # object would be expired by the rollback and become unusable outside
+    # an async greenlet. Detached objects retain their loaded attributes.
+    db.expunge(user)
+
     try:
         await set_transaction_identity(db, str(user.id), user.role)
     except Exception:

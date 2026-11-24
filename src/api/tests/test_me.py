@@ -74,26 +74,16 @@ async def test_get_me_with_expired_token(app, mock_user):
 
 
 @pytest.mark.asyncio
-async def test_patch_me_updates_display_name(client: AsyncClient, auth_headers: dict, mock_user):
+async def test_patch_me_updates_display_name(app, auth_headers: dict, mock_user):
     """PATCH /v1/me with display_name updates and returns the new value."""
-    # Patch the db session used in patch_me
-    with patch("app.routers.me.get_db") as mock_get_db:
-        mock_session = AsyncMock()
+    from httpx import ASGITransport, AsyncClient
 
-        async def _dep():
-            yield mock_session
-
-        from app.deps import get_db
-
-        client.app.dependency_overrides[get_db] = _dep
-
-        response = await client.patch(
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.patch(
             "/v1/me",
             json={"display_name": "New Name"},
             headers=auth_headers,
         )
-
-        client.app.dependency_overrides.pop(get_db, None)
 
     assert response.status_code == 200
     data = response.json()
