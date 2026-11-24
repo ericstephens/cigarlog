@@ -46,6 +46,7 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Token missing sub claim")
 
     # Upsert: insert on conflict (idp_subject) do update email
+    now = datetime.now(timezone.utc)
     stmt = (
         pg_insert(AppUser)
         .values(
@@ -56,8 +57,9 @@ async def get_current_user(
             unit_system="imperial",
             timezone="UTC",
             trusted=False,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
+            adult_attested_at=now,
+            created_at=now,
+            updated_at=now,
         )
         .on_conflict_do_update(
             index_elements=["idp_subject"],
