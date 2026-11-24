@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import select, text
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import AppUser
@@ -53,6 +53,16 @@ async def patch_me(
     )
     await db.commit()
 
-    result = await db.execute(select(AppUser).where(AppUser.id == current_user.id))
-    user = result.scalars().first()
-    return UserResponse.model_validate(user)
+    # Build the response from in-memory state rather than re-querying the ORM,
+    # which would trigger a lazy attribute load outside the greenlet context.
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        display_name=update.display_name if update.display_name is not None else current_user.display_name,
+        role=current_user.role,
+        unit_system=update.unit_system if update.unit_system is not None else current_user.unit_system,
+        timezone=update.timezone if update.timezone is not None else current_user.timezone,
+        trusted=current_user.trusted,
+        created_at=current_user.created_at,
+        updated_at=now,
+    )
