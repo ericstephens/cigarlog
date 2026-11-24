@@ -40,7 +40,13 @@ async def get_current_user(
 
     claims = verify_token(credentials.credentials)
 
-    sub: str = claims.get("sub", "")
+    # Keycloak 26 omits sub from access tokens by default; fall back to
+    # preferred_username (email) which is stable enough for local dev.
+    sub: str = (
+        claims.get("sub", "")
+        or claims.get("preferred_username", "")
+        or claims.get("email", "")
+    )
     email: str = claims.get("email", "")
     name: str = claims.get("name", "") or claims.get("preferred_username", "")
     if not sub:
