@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Boolean, DateTime, Enum, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -23,8 +23,16 @@ class AppUser(Base):
     idp_subject: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
     email: Mapped[str] = mapped_column(String, nullable=False)
     display_name: Mapped[str] = mapped_column(String, nullable=False, default="")
-    role: Mapped[str] = mapped_column(String, nullable=False, default="member")
-    unit_system: Mapped[str] = mapped_column(String, nullable=False, default="imperial")
+    role: Mapped[str] = mapped_column(
+        Enum("member", "curator", "admin", name="user_role", create_type=False),
+        nullable=False,
+        default="member",
+    )
+    unit_system: Mapped[str] = mapped_column(
+        Enum("imperial", "metric", name="unit_system", create_type=False),
+        nullable=False,
+        default="imperial",
+    )
     timezone: Mapped[str] = mapped_column(String, nullable=False, default="UTC")
     trusted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     adult_attested_at: Mapped[datetime | None] = mapped_column(

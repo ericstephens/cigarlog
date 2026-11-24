@@ -9,6 +9,7 @@ import { getMe, patchMe } from '../api/me'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { FormField } from '../components/ui/FormField'
+import { TimezoneSelect } from '../components/TimezoneSelect'
 
 const schema = z.object({
   display_name: z.string().min(1, 'Required').max(100),
@@ -42,6 +43,7 @@ function SettingsForm() {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
 
@@ -75,7 +77,10 @@ function SettingsForm() {
         </select>
       </FormField>
       <FormField label="Timezone" error={errors.timezone?.message}>
-        <Input {...register('timezone')} placeholder="e.g. America/New_York" />
+        <TimezoneSelect
+          value={data?.timezone ?? 'UTC'}
+          onChange={(tz) => reset({ ...watch(), timezone: tz })}
+        />
       </FormField>
       {mutation.isError && (
         <p className="text-sm text-red-400">{String(mutation.error)}</p>
