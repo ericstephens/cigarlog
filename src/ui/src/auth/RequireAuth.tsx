@@ -2,13 +2,13 @@ import { useEffect, type ReactNode } from 'react'
 import { useAuth } from './AuthProvider'
 
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading, login } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      login()
+      window.location.replace('/login')
     }
-  }, [isLoading, isAuthenticated, login])
+  }, [isLoading, isAuthenticated])
 
   if (isLoading) {
     return (
