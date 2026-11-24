@@ -21,6 +21,8 @@ const mockLounges = [
     city: 'Chicago',
     state: 'IL',
     country: 'USA',
+    address: '123 Smoke Blvd',
+    postal_code: '60601',
     website: null,
     notes: null,
     created_at: '2026-01-01T00:00:00Z',

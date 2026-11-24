@@ -6,6 +6,8 @@ export interface Lounge {
   city: string | null
   state: string | null
   country: string | null
+  address: string | null
+  postal_code: string | null
   website: string | null
   notes: string | null
   created_at: string
@@ -17,6 +19,8 @@ export interface LoungeWrite {
   city?: string
   state?: string
   country?: string
+  address?: string
+  postal_code?: string
   website?: string
   notes?: string
 }

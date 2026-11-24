@@ -37,6 +37,12 @@ describe('LoungesPage', () => {
     expect(screen.getByText('Chicago, IL, USA')).toBeInTheDocument()
   })
 
+  it('renders address and postal code in table', async () => {
+    render(wrap(<LoungesPage />))
+    await screen.findByText('The Humidor')
+    expect(screen.getByText('123 Smoke Blvd 60601')).toBeInTheDocument()
+  })
+
   it('does not show admin controls for a member', async () => {
     render(wrap(<LoungesPage />))
     await screen.findByText('The Humidor')
@@ -64,6 +70,20 @@ describe('LoungesPage', () => {
     expect(await screen.findByRole('heading', { name: /new lounge/i })).toBeInTheDocument()
     // The form renders with an autoFocus name input (first textbox in the form)
     expect(screen.getAllByRole('textbox')[0]).toBeInTheDocument()
+  })
+
+  it('renders state picklist in the form', async () => {
+    server.use(http.get('*/v1/me', () => HttpResponse.json(mockAdminUser)))
+    const user = userEvent.setup()
+
+    render(wrap(<LoungesPage />))
+    await user.click(await screen.findByRole('button', { name: /new lounge/i }))
+
+    // StateSelect renders as a combobox / listbox role in some renderers; check by option text
+    const stateSelect = screen.getByRole('combobox')
+    expect(stateSelect).toBeInTheDocument()
+    // Illinois should be an option
+    expect(screen.getByRole('option', { name: /IL – Illinois/i })).toBeInTheDocument()
   })
 
   it('shows validation error when name is empty on submit', async () => {

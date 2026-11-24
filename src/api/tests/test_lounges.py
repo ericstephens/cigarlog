@@ -16,6 +16,8 @@ def _make_lounge(**overrides):
     lounge.city = overrides.get("city", "Chicago")
     lounge.state = overrides.get("state", "IL")
     lounge.country = overrides.get("country", "USA")
+    lounge.address = overrides.get("address", None)
+    lounge.postal_code = overrides.get("postal_code", None)
     lounge.website = overrides.get("website", None)
     lounge.notes = overrides.get("notes", None)
     lounge.deleted_at = overrides.get("deleted_at", None)
@@ -138,6 +140,31 @@ async def test_create_lounge_as_admin(app, auth_headers, mock_user):
 
     assert response.status_code == 201
     assert response.json()["name"] == "New Lounge"
+
+
+@pytest.mark.asyncio
+async def test_create_lounge_with_address(app, auth_headers, mock_user):
+    mock_user.role = "admin"
+    from app.deps import get_db
+
+    new_lounge = _make_lounge(name="Addressed Lounge", address="123 Main St", postal_code="60601")
+    dep, _ = _db_override_single(new_lounge)
+    app.dependency_overrides[get_db] = dep
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/v1/lounges",
+            json={"name": "Addressed Lounge", "address": "123 Main St", "postal_code": "60601"},
+            headers=auth_headers,
+        )
+
+    app.dependency_overrides.pop(get_db, None)
+    mock_user.role = "member"
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["address"] == "123 Main St"
+    assert data["postal_code"] == "60601"
 
 
 @pytest.mark.asyncio

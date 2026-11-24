@@ -10,13 +10,16 @@ import { Modal } from '../components/ui/Modal'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { FormField } from '../components/ui/FormField'
+import { StateSelect } from '../components/ui/StateSelect'
 import { getMe } from '../api/me'
 import { getLounges, createLounge, updateLounge, deleteLounge, type Lounge } from '../api/lounges'
 
 const schema = z.object({
   name: z.string().min(1, 'Required'),
+  address: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
+  postal_code: z.string().optional(),
   country: z.string().optional(),
   website: z.string().optional(),
   notes: z.string().optional(),
@@ -47,8 +50,10 @@ function LoungeForm({
     resolver: zodResolver(schema),
     defaultValues: {
       name: initial?.name ?? '',
+      address: initial?.address ?? '',
       city: initial?.city ?? '',
       state: initial?.state ?? '',
+      postal_code: initial?.postal_code ?? '',
       country: initial?.country ?? 'USA',
       website: initial?.website ?? '',
       notes: initial?.notes ?? '',
@@ -60,17 +65,25 @@ function LoungeForm({
       <FormField label="Name *" error={errors.name?.message}>
         <Input {...register('name')} autoFocus />
       </FormField>
+      <FormField label="Address" error={errors.address?.message}>
+        <Input {...register('address')} placeholder="Street address" />
+      </FormField>
       <div className="grid grid-cols-2 gap-3">
         <FormField label="City" error={errors.city?.message}>
           <Input {...register('city')} />
         </FormField>
         <FormField label="State" error={errors.state?.message}>
-          <Input {...register('state')} />
+          <StateSelect {...register('state')} />
         </FormField>
       </div>
-      <FormField label="Country" error={errors.country?.message}>
-        <Input {...register('country')} />
-      </FormField>
+      <div className="grid grid-cols-2 gap-3">
+        <FormField label="Postal Code" error={errors.postal_code?.message}>
+          <Input {...register('postal_code')} />
+        </FormField>
+        <FormField label="Country" error={errors.country?.message}>
+          <Input {...register('country')} />
+        </FormField>
+      </div>
       <FormField label="Website" error={errors.website?.message}>
         <Input {...register('website')} placeholder="https://" />
       </FormField>
@@ -169,6 +182,7 @@ function LoungesContent() {
             <thead className="bg-zinc-800 text-left text-zinc-400">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
+                <th className="px-4 py-3 font-medium">Address</th>
                 <th className="px-4 py-3 font-medium">Location</th>
                 <th className="px-4 py-3 font-medium">Website</th>
                 {isAdmin && <th className="px-4 py-3" />}
@@ -178,6 +192,9 @@ function LoungesContent() {
               {lounges.map((lounge) => (
                 <tr key={lounge.id} className="hover:bg-zinc-800/50">
                   <td className="px-4 py-3 font-medium text-white">{lounge.name}</td>
+                  <td className="px-4 py-3 text-zinc-400">
+                    {[lounge.address, lounge.postal_code].filter(Boolean).join(' ') || '—'}
+                  </td>
                   <td className="px-4 py-3 text-zinc-400">
                     {[lounge.city, lounge.state, lounge.country].filter(Boolean).join(', ') || '—'}
                   </td>

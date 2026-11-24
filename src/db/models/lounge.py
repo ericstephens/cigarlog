@@ -24,6 +24,8 @@ class Lounge(Base):
     city: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
     state: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
     country: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True, server_default="USA")
+    address: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
+    postal_code: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
     website: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(

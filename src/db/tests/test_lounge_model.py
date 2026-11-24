@@ -41,9 +41,16 @@ class TestLoungeInstantiation:
         lounge = Lounge(id=uuid.uuid4(), name="Minimal")
         assert lounge.city is None
         assert lounge.state is None
+        assert lounge.address is None
+        assert lounge.postal_code is None
         assert lounge.website is None
         assert lounge.notes is None
         assert lounge.deleted_at is None
+
+    def test_address_stored(self):
+        lounge = self._make(address="123 Main St", postal_code="60601")
+        assert lounge.address == "123 Main St"
+        assert lounge.postal_code == "60601"
 
     def test_country_stored(self):
         lounge = self._make(country="Canada")
@@ -82,6 +89,8 @@ def test_insert_and_query_lounge(db_connection):
             city="New York",
             state="NY",
             country="USA",
+            address="456 Smoke Ave",
+            postal_code="10001",
             website="https://example.com",
             notes="Great selection.",
         )
@@ -94,6 +103,8 @@ def test_insert_and_query_lounge(db_connection):
         assert fetched.city == "New York"
         assert fetched.state == "NY"
         assert fetched.country == "USA"
+        assert fetched.address == "456 Smoke Ave"
+        assert fetched.postal_code == "10001"
         assert fetched.website == "https://example.com"
         assert fetched.notes == "Great selection."
         assert fetched.deleted_at is None

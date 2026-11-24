@@ -10,6 +10,8 @@ class LoungeResponse(BaseModel):
     city: str | None
     state: str | None
     country: str | None
+    address: str | None
+    postal_code: str | None
     website: str | None
     notes: str | None
     created_at: datetime
@@ -23,6 +25,8 @@ class LoungeCreate(BaseModel):
     city: str | None = None
     state: str | None = None
     country: str | None = "USA"
+    address: str | None = None
+    postal_code: str | None = None
     website: str | None = None
     notes: str | None = None
 
@@ -32,5 +36,7 @@ class LoungeUpdate(BaseModel):
     city: str | None = None
     state: str | None = None
     country: str | None = None
+    address: str | None = None
+    postal_code: str | None = None
     website: str | None = None
     notes: str | None = None
