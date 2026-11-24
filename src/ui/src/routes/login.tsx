@@ -1,35 +1,67 @@
 import { useState } from 'react'
 import { userManager } from '../auth/AuthProvider'
 import { Button } from '../components/ui/Button'
+import { Input } from '../components/ui/Input'
+import { FormField } from '../components/ui/FormField'
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function handleLogin() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
     setError(null)
     setLoading(true)
     try {
-      await userManager.signinRedirect()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
+      await userManager.signinRedirect({ login_hint: email })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
       setLoading(false)
     }
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-zinc-950">
-      <div className="flex flex-col items-center gap-6">
-        <h1 className="text-2xl font-bold text-white">Cigar Log</h1>
-        <p className="text-sm text-zinc-400">Track your smokes.</p>
-        <Button onClick={() => void handleLogin()} disabled={loading}>
-          {loading ? 'Redirecting…' : 'Sign in'}
-        </Button>
-        {error && (
-          <p className="max-w-sm text-center text-xs text-red-400">
-            {error}
-          </p>
-        )}
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-white">Cigar Log</h1>
+          <p className="mt-2 text-sm text-zinc-400">Sign in to your account</p>
+        </div>
+
+        <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4">
+          <FormField label="Email">
+            <Input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+            />
+          </FormField>
+
+          <FormField label="Password">
+            <Input
+              type="password"
+              placeholder="••••••••"
+              defaultValue="dev"
+            />
+          </FormField>
+
+          {error && <p className="text-xs text-red-400">{error}</p>}
+
+          <Button type="submit" disabled={loading} className="mt-2 w-full py-2.5">
+            {loading ? 'Redirecting…' : 'Sign in'}
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-zinc-500">
+          New here?{' '}
+          <a href="/register" className="text-amber-500 hover:underline">
+            Create an account
+          </a>
+        </p>
       </div>
     </div>
   )

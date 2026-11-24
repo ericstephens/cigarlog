@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.db.session import engine
@@ -10,9 +11,7 @@ from app.routers import health, me
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    # Startup: nothing to do (engine is created on import)
     yield
-    # Shutdown: dispose the engine connection pool
     await engine.dispose()
 
 
@@ -22,6 +21,14 @@ def create_app() -> FastAPI:
         version="0.1.0",
         debug=settings.DEBUG,
         lifespan=lifespan,
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     app.include_router(health.router)

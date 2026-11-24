@@ -42,8 +42,11 @@ async def get_current_user(
 
     sub: str = claims.get("sub", "")
     email: str = claims.get("email", "")
+    name: str = claims.get("name", "") or claims.get("preferred_username", "")
     if not sub:
         raise HTTPException(status_code=401, detail="Token missing sub claim")
+
+    display_name = name or (email.split("@")[0] if email else sub)
 
     # Upsert: insert on conflict (idp_subject) do update email
     now = datetime.now(timezone.utc)
@@ -52,7 +55,7 @@ async def get_current_user(
         .values(
             idp_subject=sub,
             email=email,
-            display_name=email.split("@")[0] if email else sub,
+            display_name=display_name,
             role="member",
             unit_system="imperial",
             timezone="UTC",
