@@ -22,9 +22,15 @@ _require_tofu() {
   fi
 }
 
+_psql() {
+  # Run psql inside the running postgres container (no local psql needed).
+  podman exec -i cigarlog_postgres_1 \
+    psql -U postgres -d cigarlog_db "${@}"
+}
+
 _require_psql() {
-  if ! command -v psql &>/dev/null; then
-    echo "Error: 'psql' not found in PATH" >&2
+  if ! podman inspect cigarlog_postgres_1 &>/dev/null; then
+    echo "Error: postgres container not running. Run './manage.sh up' first." >&2
     exit 1
   fi
 }
@@ -247,7 +253,7 @@ case "$cmd" in
   # ── User management ─────────────────────────────────────────────────────────
   users)
     _require_psql
-    psql "$DB_URL" -c \
+    _psql -c \
       "SELECT id, email, display_name, role, trusted, created_at FROM app_user ORDER BY created_at;"
     ;;
 
@@ -259,10 +265,8 @@ case "$cmd" in
     fi
     _require_psql
     echo "Promoting $EMAIL to admin..."
-    psql "$DB_URL" -c \
-      "UPDATE app_user SET role = 'admin', trusted = true WHERE email = lower('${EMAIL}');"
-    psql "$DB_URL" -c \
-      "SELECT id, email, display_name, role, trusted FROM app_user WHERE email = lower('${EMAIL}');"
+    _psql -c "UPDATE app_user SET role = 'admin', trusted = true WHERE email = lower('${EMAIL}');"
+    _psql -c "SELECT id, email, display_name, role, trusted FROM app_user WHERE email = lower('${EMAIL}');"
     ;;
 
   demote)
@@ -272,10 +276,8 @@ case "$cmd" in
       exit 1
     fi
     _require_psql
-    psql "$DB_URL" -c \
-      "UPDATE app_user SET role = 'member', trusted = false WHERE email = lower('${EMAIL}');"
-    psql "$DB_URL" -c \
-      "SELECT id, email, display_name, role, trusted FROM app_user WHERE email = lower('${EMAIL}');"
+    _psql -c "UPDATE app_user SET role = 'member', trusted = false WHERE email = lower('${EMAIL}');"
+    _psql -c "SELECT id, email, display_name, role, trusted FROM app_user WHERE email = lower('${EMAIL}');"
     ;;
 
   curator)
@@ -286,10 +288,8 @@ case "$cmd" in
     fi
     _require_psql
     echo "Setting $EMAIL as curator..."
-    psql "$DB_URL" -c \
-      "UPDATE app_user SET role = 'curator', trusted = true WHERE email = lower('${EMAIL}');"
-    psql "$DB_URL" -c \
-      "SELECT id, email, display_name, role, trusted FROM app_user WHERE email = lower('${EMAIL}');"
+    _psql -c "UPDATE app_user SET role = 'curator', trusted = true WHERE email = lower('${EMAIL}');"
+    _psql -c "SELECT id, email, display_name, role, trusted FROM app_user WHERE email = lower('${EMAIL}');"
     ;;
 
   # ── Help ────────────────────────────────────────────────────────────────────
