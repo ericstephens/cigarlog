@@ -12,6 +12,10 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Lounges', href: '/lounges', icon: '🏛', quickAdd: '/lounges?new=1' },
+  { label: 'Brands', href: '/brands', icon: '🏷', quickAdd: '/brands?new=1' },
+  { label: 'Factories', href: '/factories', icon: '🏭', quickAdd: '/factories?new=1' },
+  { label: 'Vitolas', href: '/vitolas', icon: '📏', quickAdd: '/vitolas?new=1' },
+  { label: 'Cigars', href: '/cigars', icon: '🍂', quickAdd: '/cigars?new=1' },
   { label: 'Settings', href: '/settings', icon: '⚙' },
 ]
 

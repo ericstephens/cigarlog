@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.db.session import engine
-from app.routers import auth, health, lounges, me
+from app.routers import auth, brands, cigars, factories, health, lounges, me, vitolas
 
 
 @asynccontextmanager
@@ -35,6 +35,10 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(me.router)
     app.include_router(lounges.router)
+    app.include_router(brands.router)
+    app.include_router(factories.router)
+    app.include_router(vitolas.router)
+    app.include_router(cigars.router)
 
     return app
 
