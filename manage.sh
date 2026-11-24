@@ -8,7 +8,7 @@ INFRA_DIR="$REPO_ROOT/src/infra"
 DB_DIR="$REPO_ROOT/src/db"
 API_DIR="$REPO_ROOT/src/api"
 UI_DIR="$REPO_ROOT/src/ui"
-DB_URL="postgresql://postgres:cigarlog_pass_local@127.0.0.1:5432/cigarlog_db"
+DB_URL="postgresql://postgres:cigarlog_pass_local@127.0.0.1:5433/cigarlog_db"
 
 cmd="${1:-help}"
 shift || true
@@ -46,7 +46,7 @@ _env_file() {
   fi
 
   cat > "$API_DIR/.env" <<EOF
-DATABASE_URL=postgresql+asyncpg://postgres:cigarlog_pass_local@127.0.0.1:5432/cigarlog_db
+DATABASE_URL=postgresql+asyncpg://postgres:cigarlog_pass_local@127.0.0.1:5433/cigarlog_db
 OIDC_ISSUER=$issuer
 JWT_AUDIENCE=$client_id
 DEBUG=false
@@ -83,7 +83,7 @@ case "$cmd" in
     echo "Starting postgres and mock OIDC..."
     $COMPOSE up -d postgres oidc
     echo ""
-    echo "  Postgres  : localhost:5432  (db: cigarlog_db)"
+    echo "  Postgres  : localhost:5433  (db: cigarlog_db)"
     echo "  Mock OIDC : http://localhost:8080/local"
     echo ""
     echo "Next: ./manage.sh migrate"
