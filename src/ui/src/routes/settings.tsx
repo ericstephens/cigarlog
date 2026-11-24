@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuth } from '../auth/AuthProvider'
@@ -43,7 +43,7 @@ function SettingsForm() {
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
 
@@ -77,9 +77,12 @@ function SettingsForm() {
         </select>
       </FormField>
       <FormField label="Timezone" error={errors.timezone?.message}>
-        <TimezoneSelect
-          value={data?.timezone ?? 'UTC'}
-          onChange={(tz) => reset({ ...watch(), timezone: tz })}
+        <Controller
+          name="timezone"
+          control={control}
+          render={({ field }) => (
+            <TimezoneSelect value={field.value ?? 'UTC'} onChange={field.onChange} />
+          )}
         />
       </FormField>
       {mutation.isError && (

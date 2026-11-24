@@ -4,7 +4,8 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import text
+from sqlalchemy import literal, text
+from sqlalchemy.dialects.postgresql import ENUM as PgEnum
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -56,14 +57,17 @@ async def get_current_user(
 
     # Upsert: insert on conflict (idp_subject) do update email
     now = datetime.now(timezone.utc)
+    _user_role = PgEnum("member", "curator", "admin", name="user_role", create_type=False)
+    _unit_system = PgEnum("imperial", "metric", name="unit_system", create_type=False)
+
     stmt = (
         pg_insert(AppUser)
         .values(
             idp_subject=sub,
             email=email,
             display_name=display_name,
-            role="member",
-            unit_system="imperial",
+            role=literal("member", type_=_user_role),
+            unit_system=literal("imperial", type_=_unit_system),
             timezone="UTC",
             trusted=False,
             adult_attested_at=now,
