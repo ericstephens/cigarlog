@@ -47,3 +47,21 @@ variable "cors_origins" {
   type        = string
   default     = "http://localhost:5173,http://localhost:3000"
 }
+
+variable "cognito_domain_prefix" {
+  description = "Prefix for the Cognito hosted UI subdomain ({prefix}.auth.{region}.amazoncognito.com). Must be globally unique."
+  type        = string
+  default     = "auth"
+}
+
+variable "cognito_callback_urls" {
+  description = "Allowed OAuth callback URLs for the SPA client"
+  type        = list(string)
+  default     = ["http://localhost:5173/callback"]
+}
+
+variable "cognito_logout_urls" {
+  description = "Allowed logout redirect URLs for the SPA client"
+  type        = list(string)
+  default     = ["http://localhost:5173"]
+}

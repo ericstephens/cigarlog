@@ -42,3 +42,23 @@ output "api_url" {
   description = "Base URL for the API"
   value       = "http://${aws_lb.main.dns_name}"
 }
+
+output "cognito_user_pool_id" {
+  description = "Cognito User Pool ID"
+  value       = aws_cognito_user_pool.main.id
+}
+
+output "cognito_client_id" {
+  description = "Cognito SPA app client ID"
+  value       = aws_cognito_user_pool_client.spa.id
+}
+
+output "cognito_issuer" {
+  description = "OIDC issuer URL — use as OIDC_ISSUER (API) and VITE_OIDC_AUTHORITY (UI)"
+  value       = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.main.id}"
+}
+
+output "cognito_hosted_ui" {
+  description = "Cognito hosted sign-in UI base URL"
+  value       = "https://${aws_cognito_user_pool_domain.main.domain}.auth.${var.aws_region}.amazoncognito.com"
+}
