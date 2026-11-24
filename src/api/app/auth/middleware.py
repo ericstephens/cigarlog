@@ -14,15 +14,11 @@ async def set_transaction_identity(
     Set Postgres local variables for row-level security.
     Must be called after BEGIN (i.e., inside an open transaction).
     """
-    await session.execute(
-        # Use text() for parameterized SET LOCAL via execute
-        # Postgres does not support bind parameters for SET LOCAL, so we
-        # sanitize by allowing only safe characters.
-        __import__("sqlalchemy").text(
-            f"SET LOCAL app.current_user_id = '{_safe(user_id)}';"
-            f"SET LOCAL app.current_role = '{_safe(role)}';"
-        )
-    )
+    from sqlalchemy import text  # noqa: PLC0415
+
+    # asyncpg rejects multi-statement strings — use two separate execute calls.
+    await session.execute(text(f"SET LOCAL app.current_user_id = '{_safe(user_id)}'"))
+    await session.execute(text(f"SET LOCAL app.current_role = '{_safe(role)}'"))
 
 
 def _safe(value: str) -> str:
