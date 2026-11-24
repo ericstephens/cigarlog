@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import AppUser
@@ -25,18 +26,33 @@ async def patch_me(
     current_user: Annotated[AppUser, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> UserResponse:
-    """Update the current user's profile fields."""
+    """Update the current user's profile fields.
+
+    Uses raw SQL to avoid asyncpg's inability to implicitly cast Python
+    strings to native PostgreSQL enum types in bound parameters.
+    """
+    now = datetime.now(timezone.utc)
+    params: dict = {"id": str(current_user.id), "now": now}
+    sets = ["updated_at = :now"]
+
     if update.display_name is not None:
-        current_user.display_name = update.display_name
+        sets.append("display_name = :display_name")
+        params["display_name"] = update.display_name
+
     if update.unit_system is not None:
-        current_user.unit_system = update.unit_system
+        # Inline cast required — asyncpg cannot bind str → unit_system enum
+        sets.append(f"unit_system = '{update.unit_system}'::unit_system")
+
     if update.timezone is not None:
-        current_user.timezone = update.timezone
+        sets.append("timezone = :timezone")
+        params["timezone"] = update.timezone
 
-    current_user.updated_at = datetime.now(timezone.utc)
-
-    db.add(current_user)
+    await db.execute(
+        text(f"UPDATE app_user SET {', '.join(sets)} WHERE id = :id::uuid"),
+        params,
+    )
     await db.commit()
-    await db.refresh(current_user)
 
-    return UserResponse.model_validate(current_user)
+    result = await db.execute(select(AppUser).where(AppUser.id == current_user.id))
+    user = result.scalars().first()
+    return UserResponse.model_validate(user)

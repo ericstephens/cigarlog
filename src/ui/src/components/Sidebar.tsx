@@ -34,7 +34,7 @@ function NavLink({ item, isAdmin }: { item: NavItem; isAdmin: boolean }) {
         <a
           href={item.quickAdd}
           title={`New ${item.label.toLowerCase().replace(/s$/, '')}`}
-          className="mr-1 rounded px-1.5 py-1 text-zinc-500 opacity-0 transition-opacity hover:bg-zinc-700 hover:text-white group-hover:opacity-100"
+          className="mr-1 rounded px-1.5 py-1 text-sm text-zinc-500 transition-colors hover:bg-zinc-700 hover:text-white"
         >
           +
         </a>
