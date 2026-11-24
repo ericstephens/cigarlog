@@ -87,6 +87,7 @@ case "$cmd" in
     echo "  Mock OIDC : http://localhost:8080/local"
     echo ""
     echo "Next: ./manage.sh migrate"
+    echo "Tip:  ./manage.sh oidc:keycloak  to run with Keycloak instead"
     ;;
 
   down)
@@ -104,6 +105,31 @@ case "$cmd" in
 
   ps)
     $COMPOSE ps
+    ;;
+
+  # ── OIDC provider switching ─────────────────────────────────────────────────
+  oidc:mock)
+    echo "Starting mock OIDC provider (port 8080)..."
+    $COMPOSE up -d oidc
+    echo ""
+    echo "  Mock OIDC issuer : http://localhost:8080/local"
+    echo ""
+    echo "Run the API with:"
+    echo "  OIDC_ISSUER=http://localhost:8080/local JWT_AUDIENCE=cigarlog ./manage.sh api"
+    echo "  (or just ./manage.sh api — these are the defaults)"
+    ;;
+
+  oidc:keycloak)
+    echo "Starting Keycloak (port 8081)..."
+    $COMPOSE up -d keycloak
+    echo ""
+    echo "  Keycloak admin UI : http://localhost:8081  (admin / admin)"
+    echo "  Realm issuer      : http://localhost:8081/realms/cigarlog"
+    echo "  Test user         : admin@cigarlog.local / admin1234"
+    echo ""
+    echo "Run the API and UI pointed at Keycloak:"
+    echo "  OIDC_ISSUER=http://localhost:8081/realms/cigarlog JWT_AUDIENCE=cigarlog ./manage.sh api"
+    echo "  VITE_OIDC_AUTHORITY=http://localhost:8081/realms/cigarlog VITE_OIDC_CLIENT_ID=cigarlog ./manage.sh ui"
     ;;
 
   # ── Database ────────────────────────────────────────────────────────────────
@@ -273,8 +299,11 @@ Usage: ./manage.sh <command> [args]
 ── Local dev (mock OIDC) ─────────────────────────────────────────────────────
   up                    Start postgres + mock OIDC containers
   down                  Stop all containers
-  logs [service]        Tail container logs (postgres | oidc)
+  logs [service]        Tail container logs (postgres | oidc | keycloak)
   ps                    Show running containers
+
+  oidc:mock             Start mock OIDC provider on :8080 (default)
+  oidc:keycloak         Start Keycloak on :8081 (realm: cigarlog, test user inside)
 
   migrate               Apply Alembic migrations (run after 'up')
   migrate:down [n]      Roll back n migrations (default 1)
@@ -314,6 +343,16 @@ Usage: ./manage.sh <command> [args]
     5. ./manage.sh ui           ← terminal 3
     6. Open http://localhost:5173
     7. ./manage.sh promote <your-email>
+
+  Local dev (Keycloak OIDC):
+    1. ./manage.sh install
+    2. ./manage.sh up && ./manage.sh oidc:keycloak
+    3. ./manage.sh migrate
+    4. OIDC_ISSUER=http://localhost:8081/realms/cigarlog JWT_AUDIENCE=cigarlog ./manage.sh api
+    5. VITE_OIDC_AUTHORITY=http://localhost:8081/realms/cigarlog VITE_OIDC_CLIENT_ID=cigarlog ./manage.sh ui
+    6. Open http://localhost:5173
+    7. Sign in as admin@cigarlog.local / admin1234
+    8. ./manage.sh promote admin@cigarlog.local
 
   Switch to Cognito (needs AWS credentials):
     1. ./manage.sh infra:init
