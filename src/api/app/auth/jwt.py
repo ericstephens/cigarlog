@@ -13,8 +13,15 @@ _jwks_cache: dict[str, Any] = {}
 _JWKS_TTL = 300  # 5 minutes
 
 
-def _jwks_url() -> str:
-    return f"{settings.OIDC_ISSUER}/.well-known/jwks.json"
+def _discover_jwks_uri() -> str:
+    """Fetch the OIDC discovery document and return the jwks_uri."""
+    discovery_url = f"{settings.OIDC_ISSUER}/.well-known/openid-configuration"
+    try:
+        resp = httpx.get(discovery_url, timeout=10)
+        resp.raise_for_status()
+        return resp.json()["jwks_uri"]
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail="Unable to fetch JWKS") from exc
 
 
 def _get_jwks() -> dict[str, Any]:
@@ -23,9 +30,12 @@ def _get_jwks() -> dict[str, Any]:
         return _jwks_cache
 
     try:
-        resp = httpx.get(_jwks_url(), timeout=10)
+        jwks_uri = _discover_jwks_uri()
+        resp = httpx.get(jwks_uri, timeout=10)
         resp.raise_for_status()
         data = resp.json()
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=401, detail="Unable to fetch JWKS") from exc
 
