@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -111,6 +111,15 @@ function LoungesContent() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Lounge | undefined>(undefined)
   const [confirmDelete, setConfirmDelete] = useState<Lounge | undefined>(undefined)
+
+  // Open create modal when navigated here with ?new=1
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('new') === '1') {
+      setEditing(undefined)
+      setModalOpen(true)
+      window.history.replaceState(null, '', '/lounges')
+    }
+  }, [])
 
   const { data: lounges = [], isLoading } = useQuery({
     queryKey: ['lounges'],
